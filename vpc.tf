@@ -162,7 +162,4 @@ resource "aws_instance" "bastion" {
 resource "aws_eip" "bastion" {
   instance = "${aws_instance.bastion.id}"
   vpc = true
-  tags {
-    Name = "${var.vpc_name}-bastion-eip"
-  }
 }
