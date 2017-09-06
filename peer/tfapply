@@ -1,0 +1,9 @@
+#!/bin/bash
+
+file=$(cat .lastplan)
+
+echo "Applying plan file, ${file}"
+echo
+
+terraform apply ${file}
+

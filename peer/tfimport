@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# vpc144 is a pre-existing VPC
+# We can reference that as a terraform resource if we have a valid state
+# There is probably a cleaner way to do this
+
+for env_var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION; do
+  if [[ -z "${!env_var}" ]]; then
+    echo "ERROR: Environment variable ${env_var} is not set"
+    exit 1
+  fi
+done
+
+for vpc_name in vpc144 vpc145; do
+  if [[ -e terraform.tfstate ]] && terraform state list | grep -q aws_vpc.${vpc_name}; then
+    echo "State of VPC ${vpc_name} was already imported"
+  else
+    echo "Getting VpcId for VPC ${vpc_name}"
+    vpc_id=$(aws ec2 describe-vpcs --filters Name=tag:Name,Values=${vpc_name} | jq -r '.Vpcs | .[0] | .VpcId')
+
+    echo "Importing state of VPC ${vpc_name}"
+    terraform import aws_vpc.${vpc_name} ${vpc_id}
+  fi
+done
+

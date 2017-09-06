@@ -1,0 +1,29 @@
+#!/bin/bash
+
+for vpc_name in vpc144 vpc145; do
+  if ! terraform state list | grep -q aws_vpc.${vpc_name}; then
+    echo "State of VPC ${vpc_name} must be imported"
+    exit 1
+  fi
+done
+
+terraform validate
+
+for env_var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION; do
+  if [[ -z "${!env_var}" ]]; then
+    echo "ERROR: Environment variable ${env_var} is not set"
+    exit 1
+  fi
+done
+
+stamp=$(date +%Y%m%d-%H%M)
+file="plan-${stamp}"
+
+terraform plan -out=${file}
+
+if [[ $? -eq 0 ]]; then
+  echo
+  echo "SUCCESS: Wrote plan file, ${file}"
+  cp .lastplan .prevplan
+  echo ${file} > .lastplan
+fi
