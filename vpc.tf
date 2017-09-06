@@ -1,3 +1,6 @@
+##################################################
+# VPC
+
 resource "aws_vpc" "vpc144" {
   cidr_block = "10.144.0.0/16"
   tags {
@@ -5,74 +8,34 @@ resource "aws_vpc" "vpc144" {
   }
 }
 
+##################################################
+# Internet gateway
+
 resource "aws_internet_gateway" "vpc144" {
   vpc_id = "${aws_vpc.vpc144.id}"
 }
 
-# NAT instance
-
-resource "aws_security_group" "nat" {
-  name = "${var.vpc_name}-nat-sg"
-  description = "Allow services from the private subnet through NAT"
-  tags {
-    Name = "${var.vpc_name}-nat-sg"
-  }
-
-  ingress {
-    from_port = 0
-    to_port = 65535
-    protocol = "tcp"
-    cidr_blocks = ["${aws_subnet.us-east-2b-private.cidr_block}"]
-  }
-  ingress {
-    from_port = 0
-    to_port = 65535
-    protocol = "tcp"
-    cidr_blocks = ["${aws_subnet.us-east-2c-private.cidr_block}"]
-  }
-
-  vpc_id = "${aws_vpc.vpc144.id}"
-}
-
-resource "aws_instance" "nat" {
-  ami = "${var.aws_nat_ami}"
-  availability_zone = "us-east-2b"
-  instance_type = "t2.micro"
-  key_name = "${var.aws_key_name}"
-  security_groups = ["${aws_security_group.nat.id}"]
-  subnet_id = "${aws_subnet.us-east-2b-public.id}"
-  associate_public_ip_address = true
-  source_dest_check = false
-  tags {
-    Name = "${var.vpc_name}-nat"
-  }
-}
-
-resource "aws_eip" "nat" {
-  instance = "${aws_instance.nat.id}"
-  vpc = true
-}
-
+##################################################
 # Public subnets
 
-resource "aws_subnet" "us-east-2b-public" {
+resource "aws_subnet" "public1" {
   vpc_id = "${aws_vpc.vpc144.id}"
 
   cidr_block = "10.144.0.0/24"
-  availability_zone = "us-east-2b"
+  availability_zone = "${var.vpc_az1}"
 }
 
-resource "aws_subnet" "us-east-2c-public" {
+resource "aws_subnet" "public2" {
   vpc_id = "${aws_vpc.vpc144.id}"
 
   cidr_block = "10.144.2.0/24"
-  availability_zone = "us-east-2c"
+  availability_zone = "${var.vpc_az2}"
 }
 
+##################################################
 # Routing table for public subnets
 
-#resource "aws_route_table" "us-east-2-public" {
-resource "aws_route_table" "us-east-2-public" {
+resource "aws_route_table" "public" {
   vpc_id = "${aws_vpc.vpc144.id}"
 
   route {
@@ -81,35 +44,37 @@ resource "aws_route_table" "us-east-2-public" {
   }
 }
 
-resource "aws_route_table_association" "us-east-2b-public" {
-  subnet_id = "${aws_subnet.us-east-2b-public.id}"
-  route_table_id = "${aws_route_table.us-east-2-public.id}"
+resource "aws_route_table_association" "public1" {
+  subnet_id = "${aws_subnet.public1.id}"
+  route_table_id = "${aws_route_table.public.id}"
 }
 
-resource "aws_route_table_association" "us-east-2c-public" {
-  subnet_id = "${aws_subnet.us-east-2c-public.id}"
-  route_table_id = "${aws_route_table.us-east-2-public.id}"
+resource "aws_route_table_association" "public2" {
+  subnet_id = "${aws_subnet.public2.id}"
+  route_table_id = "${aws_route_table.public.id}"
 }
 
+##################################################
 # Private subsets
 
-resource "aws_subnet" "us-east-2b-private" {
+resource "aws_subnet" "private1" {
   vpc_id = "${aws_vpc.vpc144.id}"
 
   cidr_block = "10.144.1.0/24"
-  availability_zone = "us-east-2b"
+  availability_zone = "${var.vpc_az1}"
 }
 
-resource "aws_subnet" "us-east-2c-private" {
+resource "aws_subnet" "private2" {
   vpc_id = "${aws_vpc.vpc144.id}"
 
   cidr_block = "10.144.3.0/24"
-  availability_zone = "us-east-2c"
+  availability_zone = "${var.vpc_az2}"
 }
 
+##################################################
 # Routing table for private subnets
 
-resource "aws_route_table" "us-east-2-private" {
+resource "aws_route_table" "private" {
   vpc_id = "${aws_vpc.vpc144.id}"
 
   route {
@@ -118,48 +83,12 @@ resource "aws_route_table" "us-east-2-private" {
   }
 }
 
-resource "aws_route_table_association" "us-east-2b-private" {
-  subnet_id = "${aws_subnet.us-east-2b-private.id}"
-  route_table_id = "${aws_route_table.us-east-2-private.id}"
+resource "aws_route_table_association" "private1" {
+  subnet_id = "${aws_subnet.private1.id}"
+  route_table_id = "${aws_route_table.private.id}"
 }
 
-resource "aws_route_table_association" "us-east-2c-private" {
-  subnet_id = "${aws_subnet.us-east-2c-private.id}"
-  route_table_id = "${aws_route_table.us-east-2-private.id}"
-}
-
-# Bastion
-
-resource "aws_security_group" "bastion" {
-  name = "${var.vpc_name}-bastion-sg"
-  description = "Allow SSH traffic from the internet"
-  tags {
-    Name = "${var.vpc_name}-bastion-sg"
-  }
-
-  ingress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  vpc_id = "${aws_vpc.vpc144.id}"
-}
-
-resource "aws_instance" "bastion" {
-  ami = "${var.aws_linux_ami}"
-  availability_zone = "us-east-2b"
-  instance_type = "t2.micro"
-  key_name = "${var.aws_key_name}"
-  security_groups = ["${aws_security_group.bastion.id}"]
-  subnet_id = "${aws_subnet.us-east-2b-public.id}"
-  tags {
-    Name = "${var.vpc_name}-bastion"
-  }
-}
-
-resource "aws_eip" "bastion" {
-  instance = "${aws_instance.bastion.id}"
-  vpc = true
+resource "aws_route_table_association" "private2" {
+  subnet_id = "${aws_subnet.private2.id}"
+  route_table_id = "${aws_route_table.private.id}"
 }

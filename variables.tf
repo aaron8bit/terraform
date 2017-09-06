@@ -6,6 +6,14 @@ variable "vpc_name" {
   default = "vpc144"
 }
 
+variable "vpc_az1" {
+  default = "us-east-2b"
+}
+
+variable "vpc_az2" {
+  default = "us-east-2c"
+}
+
 variable "aws_key_name" {
   default = "devopswtf-test-key"
 }
