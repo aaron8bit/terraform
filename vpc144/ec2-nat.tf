@@ -6,7 +6,7 @@ resource "aws_instance" "nat" {
   availability_zone = "${var.vpc_az1}"
   instance_type = "t2.micro"
   key_name = "${var.aws_key_name}"
-  security_groups = ["${aws_security_group.nat.id}"]
+  vpc_security_group_ids = ["${aws_security_group.nat.id}"]
   subnet_id = "${aws_subnet.public1.id}"
   associate_public_ip_address = true
   source_dest_check = false

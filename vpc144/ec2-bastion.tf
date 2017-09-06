@@ -6,7 +6,7 @@ resource "aws_instance" "bastion" {
   availability_zone = "${var.vpc_az1}"
   instance_type = "t2.micro"
   key_name = "${var.aws_key_name}"
-  security_groups = ["${aws_security_group.bastion.id}"]
+  vpc_security_group_ids = ["${aws_security_group.bastion.id}"]
   subnet_id = "${aws_subnet.public1.id}"
   tags {
     Name = "${var.vpc_name}-bastion"
