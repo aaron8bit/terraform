@@ -3,7 +3,7 @@
 
 resource "aws_instance" "nat" {
   ami = "${var.aws_nat_ami}"
-  availability_zone = "us-east-2b"
+  availability_zone = "${var.vpc_az1}"
   instance_type = "t2.micro"
   key_name = "${var.aws_key_name}"
   security_groups = ["${aws_security_group.nat.id}"]
@@ -29,15 +29,23 @@ resource "aws_security_group" "nat" {
 
   ingress {
     from_port = 0
-    to_port = 65535
-    protocol = "tcp"
+    to_port = 0
+    protocol = "-1"
     cidr_blocks = ["${aws_subnet.private1.cidr_block}"]
   }
+
   ingress {
     from_port = 0
-    to_port = 65535
-    protocol = "tcp"
+    to_port = 0
+    protocol = "-1"
     cidr_blocks = ["${aws_subnet.private2.cidr_block}"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   vpc_id = "${aws_vpc.vpc144.id}"
