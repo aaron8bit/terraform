@@ -24,6 +24,6 @@ terraform plan -out=${file}
 if [[ $? -eq 0 ]]; then
   echo
   echo "SUCCESS: Wrote plan file, ${file}"
-  cp .lastplan .prevplan
+  [[ -e .lastplan ]] && cp .lastplan .prevplan
   echo ${file} > .lastplan
 fi
