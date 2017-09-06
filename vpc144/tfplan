@@ -1,5 +1,7 @@
 #!/bin/bash
 
+terraform validate
+
 for env_var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION; do
   if [[ -z "${!env_var}" ]]; then
     echo "ERROR: Environment variable ${env_var} is not set"
