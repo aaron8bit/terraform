@@ -1,0 +1,373 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "vpc888aabe1": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "10.144.0.0/16",
+        "InstanceTenancy": "default",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "vpc144"
+          }
+        ]
+      }
+    },
+    "subnet4e740735": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.144.1.0/24",
+        "AvailabilityZone": "us-east-2b",
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        }
+      }
+    },
+    "subneta1db63ec": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.144.2.0/24",
+        "AvailabilityZone": "us-east-2c",
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        }
+      }
+    },
+    "subnet6cde6621": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.144.3.0/24",
+        "AvailabilityZone": "us-east-2c",
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        }
+      }
+    },
+    "subnet857407fe": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "10.144.0.0/24",
+        "AvailabilityZone": "us-east-2b",
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        }
+      }
+    },
+    "igw90f49bf9": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+      }
+    },
+    "dopt85ebadec": {
+      "Type": "AWS::EC2::DHCPOptions",
+      "Properties": {
+        "DomainName": "us-east-2.compute.internal",
+        "DomainNameServers": [
+          "AmazonProvidedDNS"
+        ]
+      }
+    },
+    "eip1359242235": {
+      "Type": "AWS::EC2::EIP",
+      "DependsOn": [
+        "gw2"
+      ],
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "eip5214136149": {
+      "Type": "AWS::EC2::EIP",
+      "DependsOn": [
+        "gw2"
+      ],
+      "Properties": {
+        "Domain": "vpc"
+      }
+    },
+    "instancei09408e02d53435fe6": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-07fdd962",
+        "InstanceType": "t2.micro",
+        "KeyName": "devopswtf-test-key",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "vpc144-nat"
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "DeleteOnTermination": "true",
+            "DeviceIndex": 0,
+            "SubnetId": {
+              "Ref": "subnet857407fe"
+            },
+            "PrivateIpAddresses": [
+              {
+                "PrivateIpAddress": "10.144.0.97",
+                "Primary": "true"
+              }
+            ],
+            "GroupSet": [
+              {
+                "Ref": "sgvpc144natsg"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "instancei0d69e77ae46aff6b2": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-ea87a78f",
+        "InstanceType": "t2.micro",
+        "KeyName": "devopswtf-test-key",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "vpc144-internal-test"
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "DeleteOnTermination": "true",
+            "DeviceIndex": 0,
+            "SubnetId": {
+              "Ref": "subnet4e740735"
+            },
+            "PrivateIpAddresses": [
+              {
+                "PrivateIpAddress": "10.144.1.116",
+                "Primary": "true"
+              }
+            ],
+            "GroupSet": [
+              {
+                "Ref": "sgvpc144internaltestsg"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "instancei0c9d99f072a6dcc08": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-ea87a78f",
+        "InstanceType": "t2.micro",
+        "KeyName": "devopswtf-test-key",
+        "Monitoring": "false",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "vpc144-bastion"
+          }
+        ],
+        "NetworkInterfaces": [
+          {
+            "DeleteOnTermination": "true",
+            "DeviceIndex": 0,
+            "SubnetId": {
+              "Ref": "subnet857407fe"
+            },
+            "PrivateIpAddresses": [
+              {
+                "PrivateIpAddress": "10.144.0.208",
+                "Primary": "true"
+              }
+            ],
+            "GroupSet": [
+              {
+                "Ref": "sgvpc144bastionsg"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "sgvpc144bastionsg": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow SSH traffic from the internet",
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "vpc144-bastion-sg"
+          }
+        ]
+      }
+    },
+    "sgvpc144natsg": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow services from the private subnet through NAT",
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "vpc144-nat-sg"
+          }
+        ]
+      }
+    },
+    "sgvpc144internaltestsg": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Allow traffic from the internet",
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        },
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "vpc144-internal-test-sg"
+          }
+        ]
+      }
+    },
+    "gw2": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        },
+        "InternetGatewayId": {
+          "Ref": "igw90f49bf9"
+        }
+      }
+    },
+    "dchpassoc2": {
+      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc888aabe1"
+        },
+        "DhcpOptionsId": {
+          "Ref": "dopt85ebadec"
+        }
+      }
+    },
+    "assoc3": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "eip5214136149",
+            "AllocationId"
+          ]
+        },
+        "InstanceId": {
+          "Ref": "instancei09408e02d53435fe6"
+        }
+      }
+    },
+    "assoc4": {
+      "Type": "AWS::EC2::EIPAssociation",
+      "Properties": {
+        "AllocationId": {
+          "Fn::GetAtt": [
+            "eip1359242235",
+            "AllocationId"
+          ]
+        },
+        "InstanceId": {
+          "Ref": "instancei0c9d99f072a6dcc08"
+        }
+      }
+    },
+    "ingress1": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgvpc144bastionsg"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress2": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgvpc144natsg"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "10.144.3.0/24"
+      }
+    },
+    "ingress3": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgvpc144natsg"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "10.144.1.0/24"
+      }
+    },
+    "ingress4": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgvpc144internaltestsg"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress1": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgvpc144bastionsg"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress2": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgvpc144natsg"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress3": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgvpc144internaltestsg"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    }
+  },
+  "Description": "Test vpc144 template"
+}

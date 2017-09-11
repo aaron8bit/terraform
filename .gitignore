@@ -3,3 +3,6 @@ plan-????????-????*
 .prevplan
 terraform.tfstate*
 .terraform.tfstate.lock.info
+.terraform/
+.terraform/**
+.DS_Store
